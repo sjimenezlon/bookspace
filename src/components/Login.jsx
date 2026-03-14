@@ -142,9 +142,13 @@ export default function Login({ onLogin }) {
         </motion.p>
       </motion.div>
 
-      <motion.p className="login-footer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
-        Automation Pro Max &bull; BECA IA SER ANDI &bull; Universidad EAFIT &ndash; Nodo
-      </motion.p>
+      <motion.div className="login-footer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
+        <div className="created-by">
+          <span>Created by</span>
+          <img src="/insignia-logo.png" alt="InsignIA" className="insignia-logo" />
+        </div>
+        <p>Automation Pro Max &bull; BECA IA SER ANDI &bull; Universidad EAFIT &ndash; Nodo</p>
+      </motion.div>
     </div>
   );
 }

@@ -56,6 +56,10 @@ export default function Sidebar({ active, onChange, user, onLogout }) {
             <button className="logout-btn" onClick={onLogout} title="Cerrar sesión"><SignOut size={16} /></button>
           </div>
         )}
+        <div className="sidebar-created">
+          <span>Created by</span>
+          <img src="/insignia-logo.png" alt="InsignIA" className="sidebar-insignia" />
+        </div>
         <div className="sidebar-footer"><div className="status-dot" /><span>Supabase conectado</span></div>
       </aside>
       <nav className="mobile-nav">

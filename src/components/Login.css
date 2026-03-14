@@ -440,11 +440,41 @@
 .login-footer {
   position: relative;
   z-index: 1;
+  text-align: center;
+  margin-top: 32px;
+}
+
+.login-footer p {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-dim);
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-top: 32px;
-  text-align: center;
+  margin: 0;
+}
+
+.created-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.created-by span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.insignia-logo {
+  height: 28px;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.insignia-logo:hover {
+  opacity: 1;
 }
