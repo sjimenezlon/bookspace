@@ -2,6 +2,9 @@ import { ROOMS, getRoomById, getRoomsByCapacity } from '../data/rooms';
 
 const STORAGE_KEY = 'apm_reservations';
 
+// Rooms that require admin approval (capacity >= 25)
+const APPROVAL_THRESHOLD = 25;
+
 function loadReservations() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -20,7 +23,11 @@ export function getReservations() {
 }
 
 export function getActiveReservations() {
-  return loadReservations().filter(r => r.status === 'confirmada');
+  return loadReservations().filter(r => r.status === 'confirmada' || r.status === 'pendiente');
+}
+
+export function getPendingReservations() {
+  return loadReservations().filter(r => r.status === 'pendiente');
 }
 
 function timeToMinutes(t) {
@@ -48,13 +55,11 @@ export function validateReservation(data) {
 
   if (errors.length > 0) return { valid: false, errors, type: 'incomplete' };
 
-  // Time validation
   if (timeToMinutes(data.endTime) <= timeToMinutes(data.startTime)) {
     errors.push('La hora de fin debe ser posterior a la hora de inicio.');
     return { valid: false, errors, type: 'invalid_time' };
   }
 
-  // Capacity validation
   const room = getRoomById(data.roomId);
   if (!room) {
     errors.push('Sala no encontrada.');
@@ -72,14 +77,12 @@ export function validateReservation(data) {
     };
   }
 
-  // Overlap validation
   const existing = getActiveReservations();
   const conflicting = existing.filter(
     r => r.roomId === data.roomId && r.date === data.date && overlaps(data.startTime, data.endTime, r.startTime, r.endTime)
   );
 
   if (conflicting.length > 0) {
-    // Find available rooms for same time
     const busyRoomIds = new Set(
       existing
         .filter(r => r.date === data.date && overlaps(data.startTime, data.endTime, r.startTime, r.endTime))
@@ -103,6 +106,17 @@ export function validateReservation(data) {
   return { valid: true };
 }
 
+export function getAvailableRooms(date, startTime, endTime) {
+  if (!date || !startTime || !endTime) return ROOMS.map(r => r.id);
+  const existing = getActiveReservations();
+  const busyIds = new Set(
+    existing
+      .filter(r => r.date === date && overlaps(startTime, endTime, r.startTime, r.endTime))
+      .map(r => r.roomId)
+  );
+  return ROOMS.filter(r => !busyIds.has(r.id)).map(r => r.id);
+}
+
 export function createReservation(data) {
   const validation = validateReservation(data);
   if (!validation.valid) {
@@ -122,12 +136,15 @@ export function createReservation(data) {
   }
 
   const room = getRoomById(data.roomId);
+  const needsApproval = room.capacity >= APPROVAL_THRESHOLD;
+
   const reservation = {
     ...data,
     id: crypto.randomUUID(),
     roomName: room.name,
     roomCapacity: room.capacity,
-    status: 'confirmada',
+    status: needsApproval ? 'pendiente' : 'confirmada',
+    needsApproval,
     reason: null,
     createdAt: new Date().toISOString(),
   };
@@ -136,7 +153,30 @@ export function createReservation(data) {
   all.push(reservation);
   saveReservations(all);
 
-  return { success: true, reservation };
+  return { success: true, reservation, needsApproval };
+}
+
+export function approveReservation(id, adminName) {
+  const all = loadReservations();
+  const idx = all.findIndex(r => r.id === id);
+  if (idx === -1) return false;
+  all[idx].status = 'confirmada';
+  all[idx].approvedBy = adminName;
+  all[idx].approvedAt = new Date().toISOString();
+  saveReservations(all);
+  return true;
+}
+
+export function rejectReservationAdmin(id, adminName, reason) {
+  const all = loadReservations();
+  const idx = all.findIndex(r => r.id === id);
+  if (idx === -1) return false;
+  all[idx].status = 'rechazada';
+  all[idx].reason = reason || 'Rechazada por administrador.';
+  all[idx].rejectedBy = adminName;
+  all[idx].rejectedAt = new Date().toISOString();
+  saveReservations(all);
+  return true;
 }
 
 export function cancelReservation(id) {
@@ -154,15 +194,15 @@ export function clearAllReservations() {
 }
 
 // Metrics
-export function getMetrics() {
+export function getMetrics(userFilter) {
   const all = loadReservations();
-  const active = all.filter(r => r.status === 'confirmada');
+  const filtered = userFilter ? all.filter(r => r.organizer === userFilter) : all;
+  const active = filtered.filter(r => r.status === 'confirmada');
+  const pending = filtered.filter(r => r.status === 'pendiente');
   const today = new Date().toISOString().split('T')[0];
 
-  // Reservations today
   const todayReservations = active.filter(r => r.date === today).length;
 
-  // This week
   const now = new Date();
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - now.getDay());
@@ -172,7 +212,6 @@ export function getMetrics() {
   const we = weekEnd.toISOString().split('T')[0];
   const weekReservations = active.filter(r => r.date >= ws && r.date <= we).length;
 
-  // By room
   const byRoom = {};
   ROOMS.forEach(room => { byRoom[room.id] = { ...room, count: 0, hours: 0 }; });
   active.forEach(r => {
@@ -182,11 +221,8 @@ export function getMetrics() {
     }
   });
 
-  // Peak hours
   const hourSlots = {};
-  for (let h = 7; h <= 20; h++) {
-    hourSlots[h] = 0;
-  }
+  for (let h = 7; h <= 20; h++) hourSlots[h] = 0;
   active.forEach(r => {
     const start = Math.floor(timeToMinutes(r.startTime) / 60);
     const end = Math.ceil(timeToMinutes(r.endTime) / 60);
@@ -195,24 +231,21 @@ export function getMetrics() {
     }
   });
 
-  // By team
   const byTeam = {};
-  active.forEach(r => {
-    byTeam[r.team] = (byTeam[r.team] || 0) + 1;
-  });
+  active.forEach(r => { byTeam[r.team] = (byTeam[r.team] || 0) + 1; });
 
-  // Occupancy rate per room (assuming 12 hours workday, 5 days)
-  const totalAvailableHoursPerRoom = 12; // per day
+  const totalAvailableHoursPerRoom = 12;
   const occupancyByRoom = Object.values(byRoom).map(r => ({
     ...r,
     occupancy: totalAvailableHoursPerRoom > 0 ? Math.min(100, Math.round((r.hours / totalAvailableHoursPerRoom) * 100)) : 0,
   }));
 
   return {
-    total: all.length,
+    total: filtered.length,
     active: active.length,
-    rejected: all.filter(r => r.status === 'rechazada').length,
-    cancelled: all.filter(r => r.status === 'cancelada').length,
+    pending: pending.length,
+    rejected: filtered.filter(r => r.status === 'rechazada').length,
+    cancelled: filtered.filter(r => r.status === 'cancelada').length,
     todayReservations,
     weekReservations,
     byRoom: occupancyByRoom,

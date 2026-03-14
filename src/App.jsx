@@ -1,35 +1,60 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { seedIfNeeded } from './store/seedData';
+import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import ReservationForm from './components/ReservationForm';
 import Dashboard from './components/Dashboard';
 import ReservationLog from './components/ReservationLog';
 import EmailPreview from './components/EmailPreview';
 import FloorMap from './components/FloorMap';
+import AdminPanel from './components/AdminPanel';
+import SupportChat from './components/SupportChat';
 import './App.css';
 
 function App() {
+  const [user, setUser] = useState(null);
   const [activeView, setActiveView] = useState('reserve');
   const [emailData, setEmailData] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  useEffect(() => { seedIfNeeded(); }, []);
+
+  const handleLogin = useCallback((userData) => {
+    setUser(userData);
+    setActiveView(userData.isAdmin ? 'admin' : 'reserve');
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    setUser(null);
+    setActiveView('reserve');
+  }, []);
+
   const handleReservationResult = useCallback((result) => {
-    setEmailData(result);
+    if (result.type !== 'pending') {
+      setEmailData(result);
+    }
     setRefreshKey(k => k + 1);
   }, []);
 
   const closeEmail = useCallback(() => setEmailData(null), []);
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   const views = {
-    reserve: <ReservationForm onResult={handleReservationResult} />,
-    dashboard: <Dashboard key={refreshKey} />,
-    log: <ReservationLog key={refreshKey} onRefresh={() => setRefreshKey(k => k + 1)} />,
+    reserve: <ReservationForm onResult={handleReservationResult} user={user} />,
+    dashboard: <Dashboard key={refreshKey} user={user} />,
+    log: <ReservationLog key={refreshKey} onRefresh={refresh} user={user} />,
     map: <FloorMap key={refreshKey} />,
+    admin: <AdminPanel key={refreshKey} user={user} onRefresh={refresh} />,
   };
 
   return (
     <div className="app-layout">
-      <Sidebar active={activeView} onChange={setActiveView} />
+      <Sidebar active={activeView} onChange={setActiveView} user={user} onLogout={handleLogout} />
       <main className="main-content">
         <AnimatePresence mode="wait">
           <motion.div
@@ -46,10 +71,10 @@ function App() {
       </main>
 
       <AnimatePresence>
-        {emailData && (
-          <EmailPreview data={emailData} onClose={closeEmail} />
-        )}
+        {emailData && <EmailPreview data={emailData} onClose={closeEmail} />}
       </AnimatePresence>
+
+      <SupportChat user={user} />
     </div>
   );
 }

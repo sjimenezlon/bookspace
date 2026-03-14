@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarCheck, XCircle, ChartBar, Clock, Buildings, UsersThree } from '@phosphor-icons/react';
+import { CalendarCheck, XCircle, ChartBar, Clock, Buildings, UsersThree, HourglassMedium, Prohibit } from '@phosphor-icons/react';
 import { getMetrics } from '../store/reservations';
 import './Dashboard.css';
 
@@ -17,8 +17,8 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-export default function Dashboard() {
-  const metrics = useMemo(() => getMetrics(), []);
+export default function Dashboard({ user }) {
+  const metrics = useMemo(() => getMetrics(user?.isAdmin ? null : null), []);
 
   const peakHourEntries = Object.entries(metrics.peakHours);
   const maxPeak = Math.max(...peakHourEntries.map(([,v]) => v), 1);
@@ -64,8 +64,16 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div className="stat-card" variants={fadeUp}>
+          <div className="stat-icon" style={{ background: 'var(--amber-glow)', color: 'var(--eafit-yellow)' }}>
+            <HourglassMedium size={24} weight="fill" />
+          </div>
+          <div className="stat-value">{metrics.pending}</div>
+          <div className="stat-label">Pendientes</div>
+        </motion.div>
+
+        <motion.div className="stat-card" variants={fadeUp}>
           <div className="stat-icon" style={{ background: 'var(--red-dim)', color: 'var(--red)' }}>
-            <XCircle size={24} weight="fill" />
+            <Prohibit size={24} weight="fill" />
           </div>
           <div className="stat-value">{metrics.rejected}</div>
           <div className="stat-label">Rechazadas</div>

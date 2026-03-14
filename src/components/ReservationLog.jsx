@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClockCounterClockwise, CheckCircle, XCircle, Prohibit, Trash, Funnel } from '@phosphor-icons/react';
+import { ClockCounterClockwise, CheckCircle, XCircle, Prohibit, Trash, Funnel, HourglassMedium } from '@phosphor-icons/react';
 import { getReservations, cancelReservation, clearAllReservations } from '../store/reservations';
 import './ReservationLog.css';
 
 const STATUS_CONFIG = {
   confirmada: { icon: CheckCircle, color: 'var(--green)', bg: 'var(--green-dim)', label: 'Confirmada' },
+  pendiente: { icon: HourglassMedium, color: 'var(--eafit-yellow)', bg: 'var(--amber-glow)', label: 'Pendiente' },
   rechazada: { icon: XCircle, color: 'var(--red)', bg: 'var(--red-dim)', label: 'Rechazada' },
   cancelada: { icon: Prohibit, color: 'var(--text-dim)', bg: 'rgba(74,81,104,0.15)', label: 'Cancelada' },
 };
@@ -44,7 +45,7 @@ export default function ReservationLog({ onRefresh }) {
 
       <div className="log-filters">
         <Funnel size={16} />
-        {['all', 'confirmada', 'rechazada', 'cancelada'].map(f => (
+        {['all', 'confirmada', 'pendiente', 'rechazada', 'cancelada'].map(f => (
           <button
             key={f}
             className={`filter-btn ${filter === f ? 'active' : ''}`}
@@ -99,6 +100,12 @@ export default function ReservationLog({ onRefresh }) {
                       <span className="log-sep">|</span>
                       <span>{res.attendees} pers.</span>
                     </div>
+                    {res.approvedBy && (
+                      <div className="log-reason">Aprobada por: {res.approvedBy}</div>
+                    )}
+                    {res.rejectedBy && (
+                      <div className="log-reason">Rechazada por: {res.rejectedBy}</div>
+                    )}
                     {res.reason && (
                       <div className="log-reason">Motivo: {res.reason}</div>
                     )}

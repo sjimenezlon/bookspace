@@ -29,9 +29,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--amber-glow);
-  border: 1px solid rgba(212,160,23,0.15);
-  color: var(--amber);
+  background: var(--blue-dim);
+  border: 1px solid rgba(0, 75, 133, 0.2);
+  color: var(--eafit-blue-light);
   padding: 6px 14px;
   border-radius: 20px;
   font-family: var(--font-mono);
@@ -132,6 +132,73 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+
+/* Room filter bar */
+.room-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-mono);
+}
+
+.filter-toggle.active {
+  background: var(--green-dim);
+  border-color: rgba(34,197,94,0.2);
+  color: var(--green);
+}
+
+.availability-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.no-rooms-msg {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  justify-content: center;
+}
+
+.approval-req-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  background: var(--blue-dim);
+  color: var(--eafit-blue-light);
+  padding: 1px 6px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Pending alert */
+.form-alert.pending {
+  background: var(--amber-glow);
+  border: 1px solid rgba(253,185,19,0.2);
+  color: var(--eafit-yellow);
+}
+
+.form-alert.pending svg { color: var(--eafit-yellow); flex-shrink: 0; margin-top: 2px; }
 
 /* Room grid */
 .room-grid {

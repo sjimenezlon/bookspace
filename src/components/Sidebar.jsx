@@ -1,29 +1,51 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarPlus, ChartBar, ClockCounterClockwise, Buildings, List } from '@phosphor-icons/react';
+import { CalendarPlus, ChartBar, ClockCounterClockwise, Buildings, SignOut, ShieldCheck } from '@phosphor-icons/react';
+import { getPendingReservations } from '../store/reservations';
 import './Sidebar.css';
 
-const NAV_ITEMS = [
-  { id: 'reserve',  label: 'Nueva Reserva',  icon: CalendarPlus },
-  { id: 'dashboard', label: 'Dashboard',      icon: ChartBar },
-  { id: 'log',      label: 'Historial',       icon: ClockCounterClockwise },
-  { id: 'map',      label: 'Mapa de Salas',   icon: Buildings },
+const USER_NAV = [
+  { id: 'reserve',   label: 'Nueva Reserva',  icon: CalendarPlus },
+  { id: 'dashboard', label: 'Dashboard',       icon: ChartBar },
+  { id: 'log',       label: 'Historial',       icon: ClockCounterClockwise },
+  { id: 'map',       label: 'Mapa de Salas',   icon: Buildings },
 ];
 
-export default function Sidebar({ active, onChange }) {
+const ADMIN_NAV = [
+  { id: 'admin',     label: 'Administración',  icon: ShieldCheck },
+  { id: 'reserve',   label: 'Nueva Reserva',   icon: CalendarPlus },
+  { id: 'dashboard', label: 'Dashboard',        icon: ChartBar },
+  { id: 'log',       label: 'Historial',        icon: ClockCounterClockwise },
+  { id: 'map',       label: 'Mapa de Salas',    icon: Buildings },
+];
+
+export default function Sidebar({ active, onChange, user, onLogout }) {
+  const isAdmin = user?.isAdmin;
+  const navItems = isAdmin ? ADMIN_NAV : USER_NAV;
+  const pendingCount = useMemo(() => isAdmin ? getPendingReservations().length : 0, [isAdmin]);
+
   return (
     <>
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="brand-mark">
-            <span className="brand-r">ROOM</span>
-            <span className="brand-c">CONTROL</span>
+            <div className="brand-stripes">
+              <span className="bstripe bstripe-y" />
+              <span className="bstripe bstripe-b" />
+              <span className="bstripe bstripe-y" />
+              <span className="bstripe bstripe-b" />
+            </div>
+            <div>
+              <span className="brand-r">BOOK</span>
+              <span className="brand-c">SPACE</span>
+            </div>
           </div>
-          <span className="brand-sub">Automation Pro Max</span>
+          <span className="brand-sub">Universidad EAFIT &bull; Nodo</span>
         </div>
 
         <nav className="sidebar-nav">
-          <span className="nav-label">Sistema</span>
-          {NAV_ITEMS.map(item => {
+          <span className="nav-label">{isAdmin ? 'Administrador' : 'Sistema'}</span>
+          {navItems.map(item => {
             const Icon = item.icon;
             const isActive = active === item.id;
             return (
@@ -41,10 +63,29 @@ export default function Sidebar({ active, onChange }) {
                 )}
                 <Icon size={20} weight={isActive ? 'fill' : 'regular'} className="nav-icon" />
                 <span>{item.label}</span>
+                {item.id === 'admin' && pendingCount > 0 && (
+                  <span className="nav-badge">{pendingCount}</span>
+                )}
               </button>
             );
           })}
         </nav>
+
+        {user && (
+          <div className="sidebar-user">
+            <div className="user-avatar">{user.avatar}</div>
+            <div className="user-info">
+              <span className="user-name">{user.name}</span>
+              <span className="user-role">
+                {user.role} &bull; {user.dept}
+                {isAdmin && <span className="admin-indicator"> &bull; ADMIN</span>}
+              </span>
+            </div>
+            <button className="logout-btn" onClick={onLogout} title="Cerrar sesión">
+              <SignOut size={16} />
+            </button>
+          </div>
+        )}
 
         <div className="sidebar-footer">
           <div className="status-dot" />
@@ -52,17 +93,12 @@ export default function Sidebar({ active, onChange }) {
         </div>
       </aside>
 
-      {/* Mobile nav */}
       <nav className="mobile-nav">
-        {NAV_ITEMS.map(item => {
+        {navItems.map(item => {
           const Icon = item.icon;
           const isActive = active === item.id;
           return (
-            <button
-              key={item.id}
-              className={`mobile-nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => onChange(item.id)}
-            >
+            <button key={item.id} className={`mobile-nav-item ${isActive ? 'active' : ''}`} onClick={() => onChange(item.id)}>
               <Icon size={22} weight={isActive ? 'fill' : 'regular'} />
               <span>{item.label}</span>
             </button>

@@ -41,9 +41,9 @@ export default function FloorMap() {
   }, [today, nowMinutes]);
 
   const floors = [
-    { name: 'Piso 1', subtitle: 'Salas compactas', rooms: ROOMS.filter(r => r.floor === 'Piso 1') },
-    { name: 'Piso 2', subtitle: 'Salas medianas', rooms: ROOMS.filter(r => r.floor === 'Piso 2') },
-    { name: 'Piso 3', subtitle: 'Sala grande + Auditorio', rooms: ROOMS.filter(r => r.floor === 'Piso 3') },
+    { name: 'Bloque 18', subtitle: 'Salas compactas (5 pers.)', rooms: ROOMS.filter(r => r.floor === 'Bloque 18') },
+    { name: 'Bloque 19', subtitle: 'Salas medianas (10 pers.)', rooms: ROOMS.filter(r => r.floor === 'Bloque 19') },
+    { name: 'Bloque 26', subtitle: 'Sala grande + Auditorio', rooms: ROOMS.filter(r => r.floor === 'Bloque 26') },
   ];
 
   return (
