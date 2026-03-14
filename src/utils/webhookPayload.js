@@ -1,15 +1,16 @@
 import { getRoomById } from '../data/rooms';
 
+const N8N_WEBHOOK_URL = 'https://lasg5.app.n8n.cloud/webhook/bookspace-reserva';
+
 /**
  * Generates a webhook-compatible JSON payload for n8n/Make/Zapier integration.
- * This payload is what gets sent to the automation tool when a reservation is created.
  */
 export function buildWebhookPayload(reservation) {
   const room = getRoomById(reservation.roomId);
   const isConfirmed = reservation.status === 'confirmada';
   const isPending = reservation.status === 'pendiente';
 
-  const base = {
+  return {
     evento: isPending ? 'reserva_pendiente' : isConfirmed ? 'reserva_confirmada' : 'reserva_rechazada',
     timestamp: reservation.createdAt,
     reserva_id: reservation.id,
@@ -31,25 +32,33 @@ export function buildWebhookPayload(reservation) {
       ? `${reservation.alternatives[0].name} disponible en ese horario`
       : null,
   };
-
-  return base;
 }
 
 /**
- * Simulates sending the webhook payload.
- * In production, this would POST to the n8n webhook URL.
+ * Sends the webhook payload to n8n.
  */
-export function simulateWebhookSend(reservation, webhookUrl) {
+export async function sendWebhook(reservation) {
   const payload = buildWebhookPayload(reservation);
 
-  console.log('[Bookspace Webhook] Payload enviado:', JSON.stringify(payload, null, 2));
+  console.log('[Bookspace → n8n] Enviando:', JSON.stringify(payload, null, 2));
 
-  // In production:
-  // return fetch(webhookUrl, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(payload),
-  // });
+  try {
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-  return Promise.resolve({ ok: true, payload });
+    if (response.ok) {
+      console.log('[Bookspace → n8n] Enviado exitosamente');
+    } else {
+      console.warn('[Bookspace → n8n] Respuesta:', response.status);
+    }
+
+    return { ok: response.ok, payload };
+  } catch (err) {
+    console.warn('[Bookspace → n8n] Error de conexión:', err.message);
+    // No bloquear la reserva si el webhook falla
+    return { ok: false, payload, error: err.message };
+  }
 }

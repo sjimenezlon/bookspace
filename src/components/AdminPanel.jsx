@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, CheckCircle, XCircle, Clock, Warning, Users, Buildings, CalendarCheck, FileXls, FileCsv, DownloadSimple } from '@phosphor-icons/react';
 import { getPendingReservations, getReservations, approveReservation, rejectReservationAdmin, getMetrics } from '../store/reservations';
+import { sendWebhook } from '../utils/webhookPayload';
 import * as XLSX from 'xlsx';
 import './AdminPanel.css';
 
@@ -80,12 +81,18 @@ export default function AdminPanel({ user, onRefresh }) {
 
   const handleApprove = (id) => {
     approveReservation(id, user.name);
+    // Notify n8n that reservation was approved
+    const updated = getReservations().find(r => r.id === id);
+    if (updated) sendWebhook(updated);
     onRefresh();
   };
 
   const handleReject = (id) => {
     if (rejectId === id && rejectReason.trim()) {
       rejectReservationAdmin(id, user.name, rejectReason);
+      // Notify n8n that reservation was rejected by admin
+      const updated = getReservations().find(r => r.id === id);
+      if (updated) sendWebhook(updated);
       setRejectId(null);
       setRejectReason('');
       onRefresh();
