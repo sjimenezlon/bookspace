@@ -1,4 +1,4 @@
-import { getRoomById } from '../data/rooms';
+import { getRoomById } from '../store/reservations';
 
 function formatDate(dateStr) {
   const [y, m, d] = dateStr.split('-');

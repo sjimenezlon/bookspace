@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookspace - BECA IA SER ANDI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0a0e1a;
+      --navy-light: #111730;
+      --navy-mid: #161d38;
+      --eafit-yellow: #FDB913;
+      --eafit-blue: #004B85;
+      --eafit-blue-light: #0068b7;
+      --white: #f0f0f5;
+      --gray: #8892b0;
+      --gray-light: #ccd6f6;
+      --font-heading: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Syne', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ========== NOISE OVERLAY ========== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    /* ========== SCROLL REVEAL ========== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.12s; }
+    .reveal-delay-2 { transition-delay: 0.24s; }
+    .reveal-delay-3 { transition-delay: 0.36s; }
+    .reveal-delay-4 { transition-delay: 0.48s; }
+    .reveal-delay-5 { transition-delay: 0.60s; }
+    .reveal-delay-6 { transition-delay: 0.72s; }
+    .reveal-delay-7 { transition-delay: 0.84s; }
+    .reveal-delay-8 { transition-delay: 0.96s; }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-80px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-left.visible { opacity: 1; transform: translateX(0); }
+
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(80px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+    .reveal-scale {
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+    /* ========== TYPOGRAPHY ========== */
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; }
+    h1 { font-size: clamp(3rem, 8vw, 8rem); line-height: 0.95; }
+    h2 { font-size: clamp(2rem, 5vw, 4.5rem); line-height: 1.05; }
+    h3 { font-size: clamp(1.3rem, 2.5vw, 2rem); }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--eafit-yellow);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-label::before {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--eafit-yellow);
+    }
+
+    /* ========== LAYOUT ========== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    section {
+      position: relative;
+      padding: 8rem 0;
+    }
+
+    /* ========== DIAGONAL DIVIDERS ========== */
+    .diagonal-top {
+      position: relative;
+    }
+    .diagonal-top::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: inherit;
+      transform: skewY(-2.5deg);
+      z-index: -1;
+    }
+    .diagonal-bottom::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: inherit;
+      transform: skewY(2.5deg);
+      z-index: -1;
+    }
+
+    /* ========== HERO ========== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 4rem 0;
+    }
+
+    .hero-bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(253, 185, 19, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(253, 185, 19, 0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 20s linear infinite;
+    }
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(60px, 60px); }
+    }
+
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.3;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+    .hero-orb-1 {
+      width: 500px; height: 500px;
+      background: var(--eafit-blue);
+      top: -100px; right: -100px;
+    }
+    .hero-orb-2 {
+      width: 400px; height: 400px;
+      background: var(--eafit-yellow);
+      bottom: -50px; left: -100px;
+      animation-delay: -3s;
+    }
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -30px) scale(1.1); }
+    }
+
+    .hero-content {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--eafit-yellow);
+      border: 1px solid rgba(253, 185, 19, 0.3);
+      padding: 0.6rem 1.8rem;
+      border-radius: 100px;
+      margin-bottom: 3rem;
+      animation: badgePulse 3s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(253, 185, 19, 0.2); }
+      50% { box-shadow: 0 0 0 12px rgba(253, 185, 19, 0); }
+    }
+
+    .hero-title {
+      font-size: clamp(4rem, 12vw, 11rem);
+      line-height: 0.88;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .hero-title span {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--white) 0%, var(--eafit-yellow) 50%, var(--eafit-blue-light) 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleShimmer 5s ease-in-out infinite;
+    }
+    @keyframes titleShimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero-stripes {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin: 2rem 0 2.5rem;
+    }
+    .hero-stripe {
+      width: 60px;
+      height: 4px;
+      border-radius: 2px;
+      animation: stripeGrow 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    .hero-stripe:nth-child(1) { background: var(--eafit-yellow); animation-delay: 0.8s; }
+    .hero-stripe:nth-child(2) { background: var(--eafit-blue-light); animation-delay: 1.0s; }
+    .hero-stripe:nth-child(3) { background: var(--eafit-yellow); animation-delay: 1.2s; }
+    .hero-stripe:nth-child(4) { background: var(--eafit-blue-light); animation-delay: 1.4s; }
+    .hero-stripe:nth-child(5) { background: var(--eafit-yellow); animation-delay: 1.6s; }
+    @keyframes stripeGrow {
+      0% { transform: scaleX(0); }
+      100% { transform: scaleX(1); }
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-body);
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-weight: 400;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto 1rem;
+    }
+
+    .hero-etapa {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--eafit-blue-light);
+      letter-spacing: 0.15em;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--gray);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      animation: scrollBounce 2s ease-in-out infinite;
+    }
+    .scroll-indicator .line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--eafit-yellow), transparent);
+    }
+    @keyframes scrollBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* ========== PROBLEM SECTION ========== */
+    .problem-section {
+      background: var(--navy-light);
+      position: relative;
+      z-index: 1;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      margin-top: 3rem;
+    }
+
+    .chaos-visual, .order-visual {
+      border-radius: 16px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .chaos-visual {
+      background: linear-gradient(135deg, #1a0a0a, #2a1515);
+      border: 1px solid rgba(255, 80, 80, 0.2);
+    }
+    .chaos-visual .room-block {
+      background: rgba(255, 80, 80, 0.1);
+      border: 1px solid rgba(255, 80, 80, 0.3);
+      border-radius: 8px;
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #ff6b6b;
+      position: relative;
+      animation: chaosShake 0.5s ease-in-out infinite alternate;
+    }
+    .chaos-visual .room-block:nth-child(even) { animation-delay: 0.15s; }
+    .chaos-visual .room-block .conflict {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #ff4444;
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    @keyframes chaosShake {
+      0% { transform: translateX(-2px); }
+      100% { transform: translateX(2px); }
+    }
+
+    .order-visual {
+      background: linear-gradient(135deg, #0a1a15, #0a2a1a);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+    .order-visual .room-block {
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      border-radius: 8px;
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #00ff88;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-visual .room-block .status {
+      font-size: 0.6rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(0, 255, 136, 0.15);
+    }
+
+    .visual-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .chaos-visual .visual-label { color: #ff6b6b; }
+    .chaos-visual .visual-label::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #ff4444; animation: blink 1s infinite; }
+    .order-visual .visual-label { color: #00ff88; }
+    .order-visual .visual-label::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #00ff88; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .arrow-transition {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: var(--eafit-yellow);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      width: 60px;
+      height: 60px;
+      background: var(--navy-light);
+      border-radius: 50%;
+      border: 2px solid var(--eafit-yellow);
+      font-family: var(--font-body);
+    }
+
+    /* ========== SOLUTION ARCHITECTURE ========== */
+    .solution-section {
+      background: var(--navy);
+    }
+
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 4rem 0 2rem;
+      flex-wrap: wrap;
+    }
+
+    .arch-node {
+      background: var(--navy-mid);
+      border: 1px solid rgba(253, 185, 19, 0.15);
+      border-radius: 14px;
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+      min-width: 180px;
+      max-width: 200px;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .arch-node:hover {
+      border-color: var(--eafit-yellow);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(253, 185, 19, 0.1);
+    }
+    .arch-node-icon {
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+    .arch-node-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--white);
+      margin-bottom: 0.3rem;
+    }
+    .arch-node-desc {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--gray);
+    }
+
+    .arch-arrow {
+      font-size: 1.5rem;
+      color: var(--eafit-yellow);
+      padding: 0 0.8rem;
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    /* ========== FEATURES GRID ========== */
+    .features-section {
+      background: var(--navy-light);
+      position: relative;
+      z-index: 1;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--eafit-yellow), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .feature-card:hover {
+      border-color: rgba(253, 185, 19, 0.2);
+      transform: translateY(-4px);
+      background: rgba(253, 185, 19, 0.02);
+    }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+      background: rgba(253, 185, 19, 0.08);
+      border: 1px solid rgba(253, 185, 19, 0.15);
+    }
+
+    .feature-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* ========== BUSINESS RULES ========== */
+    .rules-section {
+      background: var(--navy);
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+
+    .rule-card {
+      background: var(--navy-mid);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .rule-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(253, 185, 19, 0.2);
+    }
+
+    .rule-number {
+      font-family: var(--font-heading);
+      font-size: 4rem;
+      font-style: italic;
+      color: var(--eafit-yellow);
+      opacity: 0.15;
+      position: absolute;
+      top: 0.5rem;
+      right: 1.5rem;
+      line-height: 1;
+    }
+
+    .rule-icon-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 1.5rem;
+      background: rgba(253, 185, 19, 0.08);
+      border: 2px solid rgba(253, 185, 19, 0.2);
+    }
+
+    .rule-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .rule-desc {
+      color: var(--gray);
+      font-size: 0.85rem;
+    }
+
+    .hitl-box {
+      background: linear-gradient(135deg, rgba(0, 75, 133, 0.15), rgba(253, 185, 19, 0.08));
+      border: 1px solid rgba(253, 185, 19, 0.2);
+      border-radius: 20px;
+      padding: 3rem;
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .hitl-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .hitl-step {
+      background: var(--navy);
+      border: 1px solid rgba(253, 185, 19, 0.2);
+      border-radius: 10px;
+      padding: 0.8rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-align: center;
+      min-width: 180px;
+      transition: all 0.3s;
+    }
+    .hitl-step:hover { border-color: var(--eafit-yellow); }
+    .hitl-step.highlight {
+      border-color: var(--eafit-yellow);
+      background: rgba(253, 185, 19, 0.05);
+      color: var(--eafit-yellow);
+    }
+    .hitl-arrow-down {
+      color: var(--eafit-yellow);
+      font-size: 1.2rem;
+      opacity: 0.5;
+    }
+
+    /* ========== AI EMAIL ========== */
+    .ai-section {
+      background: var(--navy-light);
+      position: relative;
+      z-index: 1;
+    }
+
+    .ai-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+
+    .ai-variables {
+      background: var(--navy);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+    .ai-variables h3 {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      color: var(--eafit-yellow);
+    }
+
+    .var-list {
+      list-style: none;
+    }
+    .var-list li {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      gap: 0.8rem;
+    }
+    .var-name {
+      color: var(--eafit-yellow);
+      min-width: 140px;
+    }
+    .var-value { color: var(--gray); }
+
+    .email-preview {
+      background: #0d1117;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+    }
+    .email-preview-bar {
+      background: #161b22;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .email-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .email-dot-r { background: #ff5f57; }
+    .email-dot-y { background: #febc2e; }
+    .email-dot-g { background: #28c840; }
+
+    .email-body {
+      padding: 2rem;
+    }
+    .email-body .email-header {
+      text-align: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 1.5rem;
+    }
+    .email-body .email-logo {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      color: var(--eafit-yellow);
+      margin-bottom: 0.3rem;
+    }
+    .email-body .email-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--gray);
+      text-transform: uppercase;
+    }
+    .email-body p {
+      font-size: 0.8rem;
+      color: var(--gray-light);
+      margin-bottom: 0.8rem;
+    }
+    .email-body .email-detail {
+      background: rgba(253, 185, 19, 0.05);
+      border-left: 3px solid var(--eafit-yellow);
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+    }
+    .email-body .email-detail p {
+      margin-bottom: 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    /* ========== N8N SECTION ========== */
+    .n8n-section {
+      background: var(--navy);
+    }
+
+    .n8n-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      align-items: center;
+    }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.8;
+    }
+    .code-block-header {
+      background: #161b22;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .code-block-title {
+      color: var(--gray);
+      font-size: 0.7rem;
+    }
+    .code-block-lang {
+      color: var(--eafit-yellow);
+      font-size: 0.65rem;
+      background: rgba(253, 185, 19, 0.08);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+    .code-block-body {
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    .code-block-body .key { color: #79c0ff; }
+    .code-block-body .string { color: #a5d6ff; }
+    .code-block-body .value { color: #7ee787; }
+    .code-block-body .bool { color: #ff7b72; }
+    .code-block-body .number { color: #d2a8ff; }
+    .code-block-body .brace { color: var(--gray); }
+
+    .n8n-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .n8n-flow-step {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .n8n-flow-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--eafit-yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      color: var(--eafit-yellow);
+      flex-shrink: 0;
+    }
+    .n8n-flow-text h4 {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+    }
+    .n8n-flow-text p {
+      color: var(--gray);
+      font-size: 0.85rem;
+    }
+    .n8n-flow-connector {
+      width: 2px;
+      height: 20px;
+      background: rgba(253, 185, 19, 0.2);
+      margin-left: 21px;
+    }
+
+    /* ========== TECH STACK ========== */
+    .stack-section {
+      background: var(--navy-light);
+      position: relative;
+      z-index: 1;
+    }
+
+    .stack-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      justify-content: center;
+      margin-top: 3rem;
+    }
+
+    .stack-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 100px;
+      padding: 1rem 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--gray-light);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: default;
+    }
+    .stack-chip:hover {
+      border-color: var(--eafit-yellow);
+      color: var(--eafit-yellow);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(253, 185, 19, 0.08);
+    }
+    .stack-chip .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .chip-dot-react { background: #61DAFB; }
+    .chip-dot-vite { background: #BD34FE; }
+    .chip-dot-framer { background: #FF0050; }
+    .chip-dot-phosphor { background: #D0F0C0; }
+    .chip-dot-local { background: var(--eafit-yellow); }
+    .chip-dot-vercel { background: #ffffff; }
+    .chip-dot-xlsx { background: #1D6F42; }
+    .chip-dot-n8n { background: #EA4B71; }
+
+    /* ========== FUTURE ========== */
+    .future-section {
+      background: var(--navy);
+      position: relative;
+      overflow: hidden;
+    }
+    .future-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(0, 75, 133, 0.12), transparent 70%),
+                  radial-gradient(ellipse at 70% 50%, rgba(253, 185, 19, 0.06), transparent 70%);
+    }
+
+    .future-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .future-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 1.8rem;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .future-card:hover {
+      border-color: rgba(0, 75, 133, 0.4);
+      transform: translateY(-4px);
+    }
+    .future-card-num {
+      font-family: var(--font-heading);
+      font-style: italic;
+      font-size: 2.5rem;
+      color: var(--eafit-blue-light);
+      opacity: 0.2;
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      line-height: 1;
+    }
+    .future-card h4 {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+    }
+    .future-card p {
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    /* ========== DEMO / CTA ========== */
+    .demo-section {
+      background: linear-gradient(135deg, var(--navy-mid), var(--navy));
+      text-align: center;
+      padding: 10rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-section .bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-heading);
+      font-size: clamp(8rem, 20vw, 18rem);
+      color: rgba(255, 255, 255, 0.015);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .demo-links {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .demo-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 1.2rem 2.5rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .demo-btn-primary {
+      background: var(--eafit-yellow);
+      color: var(--navy);
+    }
+    .demo-btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 60px rgba(253, 185, 19, 0.3);
+    }
+    .demo-btn-secondary {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .demo-btn-secondary:hover {
+      border-color: var(--white);
+      transform: translateY(-3px);
+    }
+
+    /* ========== FOOTER ========== */
+    .site-footer {
+      background: #060810;
+      text-align: center;
+      padding: 3rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .footer-text {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--gray);
+    }
+    .footer-text span {
+      color: var(--eafit-yellow);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .problem-grid, .ai-grid, .n8n-grid { grid-template-columns: 1fr; }
+      .rules-grid, .future-grid { grid-template-columns: 1fr 1fr; }
+      .arch-flow { gap: 1rem; }
+      .arch-arrow { display: none; }
+      .hitl-box { grid-template-columns: 1fr; }
+      .arrow-transition { display: none; }
+      section { padding: 5rem 0; }
+    }
+    @media (max-width: 600px) {
+      .rules-grid, .future-grid, .features-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: clamp(3rem, 15vw, 5rem); }
+      .container { padding: 0 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-content">
+      <div class="hero-badge">BECA IA SER ANDI &middot; Etapa 3</div>
+      <h1 class="hero-title"><span>Bookspace</span></h1>
+      <div class="hero-stripes">
+        <div class="hero-stripe"></div>
+        <div class="hero-stripe"></div>
+        <div class="hero-stripe"></div>
+        <div class="hero-stripe"></div>
+        <div class="hero-stripe"></div>
+      </div>
+      <p class="hero-subtitle">Sistema Inteligente de Reserva de Salas</p>
+      <p class="hero-etapa">Seleccion de Mentores &mdash; Universidad EAFIT &mdash; Nodo</p>
+    </div>
+    <div class="scroll-indicator">
+      <div class="line"></div>
+      SCROLL
+    </div>
+  </section>
+
+  <!-- ==================== EL PROBLEMA ==================== -->
+  <section class="problem-section diagonal-top diagonal-bottom">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">01 &mdash; Contexto</div>
+        <h2>El Problema</h2>
+        <p style="color: var(--gray); max-width: 700px; margin-top: 1rem; font-size: 1.05rem;">
+          Automation Pro Max gestiona <strong style="color: var(--white);">10 salas de reunion</strong>.
+          El proceso manual de reservas genera conflictos, doble agendamiento y perdida de productividad.
+          No existe visibilidad en tiempo real del estado de cada sala.
+        </p>
+      </div>
+
+      <div class="problem-grid" style="position: relative;">
+        <div class="chaos-visual reveal reveal-left">
+          <div class="visual-label">ANTES &mdash; CAOS MANUAL</div>
+          <div class="room-block">
+            Sala A &mdash; 09:00-10:00 &mdash; J. Garcia
+            <span class="conflict">CONFLICTO</span>
+          </div>
+          <div class="room-block">
+            Sala A &mdash; 09:30-11:00 &mdash; M. Lopez
+            <span class="conflict">DOBLE</span>
+          </div>
+          <div class="room-block">
+            Sala B &mdash; 14:00-15:00 &mdash; ???
+          </div>
+          <div class="room-block">
+            Sala C &mdash; Sin registro actualizado
+            <span class="conflict">PERDIDA</span>
+          </div>
+        </div>
+
+        <div class="order-visual reveal reveal-right">
+          <div class="visual-label">DESPUES &mdash; BOOKSPACE</div>
+          <div class="room-block">
+            Sala Aurora <span class="status">DISPONIBLE</span>
+          </div>
+          <div class="room-block">
+            Sala Nebula <span class="status">RESERVADA</span>
+          </div>
+          <div class="room-block">
+            Sala Quantum <span class="status">DISPONIBLE</span>
+          </div>
+          <div class="room-block">
+            Sala Vertex <span class="status">APROBACION</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SOLUCION ==================== -->
+  <section class="solution-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">02 &mdash; Arquitectura</div>
+        <h2>Nuestra Solucion</h2>
+        <p style="color: var(--gray); max-width: 700px; margin-top: 1rem; font-size: 1.05rem;">
+          Un flujo integral que va desde el formulario de reserva hasta la confirmacion por correo electronico,
+          pasando por validaciones inteligentes en tiempo real.
+        </p>
+      </div>
+
+      <div class="arch-flow">
+        <div class="arch-node reveal reveal-scale reveal-delay-1">
+          <span class="arch-node-icon">&#128221;</span>
+          <div class="arch-node-title">Formulario</div>
+          <div class="arch-node-desc">Datos de reserva<br>del usuario</div>
+        </div>
+        <div class="arch-arrow reveal reveal-scale reveal-delay-2">&#8594;</div>
+        <div class="arch-node reveal reveal-scale reveal-delay-2">
+          <span class="arch-node-icon">&#9989;</span>
+          <div class="arch-node-title">Validacion</div>
+          <div class="arch-node-desc">Tiempo real<br>3 reglas de negocio</div>
+        </div>
+        <div class="arch-arrow reveal reveal-scale reveal-delay-3">&#8594;</div>
+        <div class="arch-node reveal reveal-scale reveal-delay-3">
+          <span class="arch-node-icon">&#128190;</span>
+          <div class="arch-node-title">Almacenamiento</div>
+          <div class="arch-node-desc">localStorage<br>persistencia local</div>
+        </div>
+        <div class="arch-arrow reveal reveal-scale reveal-delay-4">&#8594;</div>
+        <div class="arch-node reveal reveal-scale reveal-delay-4">
+          <span class="arch-node-icon">&#129302;</span>
+          <div class="arch-node-title">Email IA</div>
+          <div class="arch-node-desc">Generacion dinamica<br>HTML personalizado</div>
+        </div>
+        <div class="arch-arrow reveal reveal-scale reveal-delay-5">&#8594;</div>
+        <div class="arch-node reveal reveal-scale reveal-delay-5">
+          <span class="arch-node-icon">&#128268;</span>
+          <div class="arch-node-title">Webhook n8n</div>
+          <div class="arch-node-desc">Envio de correo<br>real automatizado</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FUNCIONALIDADES ==================== -->
+  <section class="features-section diagonal-top diagonal-bottom">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">03 &mdash; Funcionalidades</div>
+        <h2>Todo lo que ofrece<br><em style="color: var(--eafit-yellow);">Bookspace</em></h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">&#9201;</div>
+          <div class="feature-title">Reserva en tiempo real</div>
+          <div class="feature-desc">Validacion instantanea de disponibilidad al seleccionar sala, fecha y horario. Sin esperas ni recargas.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">&#128683;</div>
+          <div class="feature-title">Prevencion de doble reserva</div>
+          <div class="feature-desc">El sistema detecta conflictos de horario y sugiere automaticamente alternativas disponibles.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">&#128101;</div>
+          <div class="feature-title">Validacion de capacidad</div>
+          <div class="feature-desc">Cada sala tiene capacidad definida. Si los asistentes superan el limite, se bloquea y se sugiere otra sala.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-icon">&#9993;</div>
+          <div class="feature-title">Email HTML generado por IA</div>
+          <div class="feature-desc">Correos de confirmacion y rechazo con diseno profesional, generados dinamicamente con variables contextuales.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-5">
+          <div class="feature-icon">&#128200;</div>
+          <div class="feature-title">Dashboard de metricas</div>
+          <div class="feature-desc">5 metricas clave en tiempo real: total reservas, tasa de ocupacion, sala mas popular, horas pico y tendencias.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-6">
+          <div class="feature-icon">&#128506;</div>
+          <div class="feature-title">Mapa de salas interactivo</div>
+          <div class="feature-desc">Visualizacion del estado actual de todas las salas: disponible, ocupada o en espera de aprobacion.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-1">
+          <div class="feature-icon">&#129309;</div>
+          <div class="feature-title">Human-in-the-Loop</div>
+          <div class="feature-desc">Salas con capacidad superior a 25 personas requieren aprobacion del administrador antes de confirmar.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">&#128172;</div>
+          <div class="feature-title">Chat de soporte</div>
+          <div class="feature-desc">Bot de asistencia con respuestas automaticas y escalado a agente humano cuando se requiere.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">&#128196;</div>
+          <div class="feature-title">Exportar Excel / CSV</div>
+          <div class="feature-desc">Descarga de todas las reservas en formato Excel o CSV para auditoria, reportes y analisis externo.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-icon">&#128268;</div>
+          <div class="feature-title">Integracion webhook n8n</div>
+          <div class="feature-desc">Envio automatico de correos reales a traves de n8n. Colaboracion con el equipo partner de automatizacion.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-5">
+          <div class="feature-icon">&#128274;</div>
+          <div class="feature-title">Roles: Usuario y Admin</div>
+          <div class="feature-desc">Super Administrador con acceso a aprobaciones, metricas y gestion completa. Usuario con reservas y chat.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== REGLAS DE NEGOCIO ==================== -->
+  <section class="rules-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">04 &mdash; Reglas de Negocio</div>
+        <h2>Logica Inteligente</h2>
+        <p style="color: var(--gray); max-width: 700px; margin-top: 1rem; font-size: 1.05rem;">
+          Tres reglas fundamentales que garantizan la integridad de cada reserva,
+          complementadas con un flujo de aprobacion humana para decisiones criticas.
+        </p>
+      </div>
+
+      <div class="rules-grid">
+        <div class="rule-card reveal reveal-delay-1">
+          <span class="rule-number">01</span>
+          <div class="rule-icon-circle">&#128683;</div>
+          <div class="rule-title">Sin Doble Reserva</div>
+          <div class="rule-desc">
+            El sistema valida en tiempo real que no existan reservas superpuestas para la misma sala, fecha y rango horario.
+            Si hay conflicto, sugiere alternativas automaticamente.
+          </div>
+        </div>
+        <div class="rule-card reveal reveal-delay-2">
+          <span class="rule-number">02</span>
+          <div class="rule-icon-circle">&#128101;</div>
+          <div class="rule-title">Validacion de Capacidad</div>
+          <div class="rule-desc">
+            Cada sala tiene una capacidad maxima definida. Si el numero de asistentes excede el limite,
+            la reserva se bloquea y se ofrece una sala alternativa con capacidad suficiente.
+          </div>
+        </div>
+        <div class="rule-card reveal reveal-delay-3">
+          <span class="rule-number">03</span>
+          <div class="rule-icon-circle">&#9201;</div>
+          <div class="rule-title">Validacion de Horario</div>
+          <div class="rule-desc">
+            No se permiten reservas en el pasado ni con horario de fin anterior al de inicio.
+            El sistema valida coherencia temporal de cada solicitud.
+          </div>
+        </div>
+      </div>
+
+      <div class="hitl-box reveal">
+        <div class="hitl-visual">
+          <div class="hitl-step">Usuario solicita sala 25+</div>
+          <div class="hitl-arrow-down">&#8595;</div>
+          <div class="hitl-step highlight">&#129309; Admin revisa solicitud</div>
+          <div class="hitl-arrow-down">&#8595;</div>
+          <div class="hitl-step">Aprobar / Rechazar</div>
+          <div class="hitl-arrow-down">&#8595;</div>
+          <div class="hitl-step">Email de resultado al usuario</div>
+        </div>
+        <div>
+          <h3 style="font-family: var(--font-body); font-weight: 700; font-size: 1.5rem; margin-bottom: 1rem;">
+            Human-in-the-Loop
+          </h3>
+          <p style="color: var(--gray); font-size: 0.95rem; margin-bottom: 1rem;">
+            Las salas con capacidad superior a <strong style="color: var(--eafit-yellow);">25 personas</strong>
+            activan un flujo de aprobacion especial. La reserva queda en estado <em>"pendiente"</em> hasta que
+            un Super Administrador la revise.
+          </p>
+          <p style="color: var(--gray); font-size: 0.95rem; margin-bottom: 1rem;">
+            Este mecanismo garantiza supervision humana en decisiones de alto impacto, alineandose con las
+            mejores practicas de IA responsable: <strong style="color: var(--white);">la IA asiste, el humano decide.</strong>
+          </p>
+          <p style="color: var(--gray); font-size: 0.85rem;">
+            El administrador puede aprobar o rechazar desde su panel, y el usuario recibe notificacion inmediata
+            con el resultado, incluyendo un correo electronico generado por IA.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== IA GENERATIVA ==================== -->
+  <section class="ai-section diagonal-top diagonal-bottom">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">05 &mdash; IA Generativa</div>
+        <h2>Emails inteligentes,<br><em style="color: var(--eafit-yellow);">generados por IA</em></h2>
+        <p style="color: var(--gray); max-width: 700px; margin-top: 1rem; font-size: 1.05rem;">
+          El sistema genera correos HTML personalizados para cada reserva, adaptando el contenido,
+          tono y diseno segun el resultado (confirmacion o rechazo).
+        </p>
+      </div>
+
+      <div class="ai-grid">
+        <div class="ai-variables reveal reveal-left">
+          <h3>Variables del template</h3>
+          <ul class="var-list">
+            <li><span class="var-name">{nombre}</span> <span class="var-value">Nombre del solicitante</span></li>
+            <li><span class="var-name">{sala}</span> <span class="var-value">Nombre de la sala reservada</span></li>
+            <li><span class="var-name">{fecha}</span> <span class="var-value">Fecha de la reserva</span></li>
+            <li><span class="var-name">{horaInicio}</span> <span class="var-value">Hora de inicio</span></li>
+            <li><span class="var-name">{horaFin}</span> <span class="var-value">Hora de finalizacion</span></li>
+            <li><span class="var-name">{asistentes}</span> <span class="var-value">Numero de personas</span></li>
+            <li><span class="var-name">{motivo}</span> <span class="var-value">Motivo de la reunion</span></li>
+            <li><span class="var-name">{estado}</span> <span class="var-value">Confirmada / Rechazada / Pendiente</span></li>
+            <li><span class="var-name">{razon}</span> <span class="var-value">Razon de rechazo (si aplica)</span></li>
+            <li><span class="var-name">{alternativa}</span> <span class="var-value">Sala alternativa sugerida</span></li>
+          </ul>
+
+          <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(253,185,19,0.05); border-radius: 10px; border-left: 3px solid var(--eafit-yellow);">
+            <p style="font-size: 0.8rem; color: var(--gray-light);">
+              La IA genera el HTML completo del correo de forma dinamica, incluyendo estilos inline,
+              iconografia y texto adaptado al contexto de cada reserva.
+            </p>
+          </div>
+        </div>
+
+        <div class="email-preview reveal reveal-right">
+          <div class="email-preview-bar">
+            <span class="email-dot email-dot-r"></span>
+            <span class="email-dot email-dot-y"></span>
+            <span class="email-dot email-dot-g"></span>
+            <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--gray); margin-left: 0.8rem;">Vista previa del correo</span>
+          </div>
+          <div class="email-body">
+            <div class="email-header">
+              <div class="email-logo">Bookspace</div>
+              <div class="email-tag">Confirmacion de Reserva</div>
+            </div>
+            <p>Hola <strong style="color: var(--eafit-yellow);">Santiago</strong>,</p>
+            <p>Tu reserva ha sido <strong style="color: #00ff88;">confirmada</strong> exitosamente.</p>
+            <div class="email-detail">
+              <p><strong style="color: var(--white);">Sala:</strong> <span style="color: var(--eafit-yellow);">Nebula</span></p>
+              <p><strong style="color: var(--white);">Fecha:</strong> 14 de marzo, 2026</p>
+              <p><strong style="color: var(--white);">Horario:</strong> 10:00 AM - 11:30 AM</p>
+              <p><strong style="color: var(--white);">Asistentes:</strong> 8 personas</p>
+              <p><strong style="color: var(--white);">Motivo:</strong> Sprint Planning Q2</p>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--gray); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+              Este correo fue generado automaticamente por Bookspace AI.
+              <br>Automation Pro Max &copy; 2026
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== N8N ==================== -->
+  <section class="n8n-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">06 &mdash; Integracion</div>
+        <h2>Webhook <em style="color: var(--eafit-yellow);">n8n</em></h2>
+        <p style="color: var(--gray); max-width: 700px; margin-top: 1rem; font-size: 1.05rem;">
+          Bookspace se conecta con n8n a traves de un webhook para enviar correos electronicos reales.
+          Una colaboracion con el equipo partner de automatizacion del Nodo.
+        </p>
+      </div>
+
+      <div class="n8n-grid">
+        <div class="code-block reveal reveal-left">
+          <div class="code-block-header">
+            <span class="code-block-title">webhook-payload.json</span>
+            <span class="code-block-lang">JSON</span>
+          </div>
+          <div class="code-block-body">
+<pre><span class="brace">{</span>
+  <span class="key">"to"</span>: <span class="string">"usuario@empresa.com"</span>,
+  <span class="key">"subject"</span>: <span class="string">"Reserva Confirmada - Sala Nebula"</span>,
+  <span class="key">"htmlBody"</span>: <span class="string">"&lt;html&gt;...email IA...&lt;/html&gt;"</span>,
+  <span class="key">"reserva"</span>: <span class="brace">{</span>
+    <span class="key">"sala"</span>: <span class="string">"Nebula"</span>,
+    <span class="key">"fecha"</span>: <span class="string">"2026-03-14"</span>,
+    <span class="key">"horaInicio"</span>: <span class="string">"10:00"</span>,
+    <span class="key">"horaFin"</span>: <span class="string">"11:30"</span>,
+    <span class="key">"asistentes"</span>: <span class="number">8</span>,
+    <span class="key">"estado"</span>: <span class="string">"confirmada"</span>,
+    <span class="key">"requiereAprobacion"</span>: <span class="bool">false</span>
+  <span class="brace">}</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-03-14T10:00:00Z"</span>
+<span class="brace">}</span></pre>
+          </div>
+        </div>
+
+        <div class="n8n-flow reveal reveal-right">
+          <div class="n8n-flow-step">
+            <div class="n8n-flow-num">1</div>
+            <div class="n8n-flow-text">
+              <h4>Bookspace genera reserva</h4>
+              <p>El usuario completa el formulario y la validacion es exitosa.</p>
+            </div>
+          </div>
+          <div class="n8n-flow-connector"></div>
+          <div class="n8n-flow-step">
+            <div class="n8n-flow-num">2</div>
+            <div class="n8n-flow-text">
+              <h4>IA genera email HTML</h4>
+              <p>Se construye el correo con todas las variables de la reserva.</p>
+            </div>
+          </div>
+          <div class="n8n-flow-connector"></div>
+          <div class="n8n-flow-step">
+            <div class="n8n-flow-num">3</div>
+            <div class="n8n-flow-text">
+              <h4>Webhook envia payload</h4>
+              <p>POST al endpoint de n8n con el JSON completo de la reserva y el email.</p>
+            </div>
+          </div>
+          <div class="n8n-flow-connector"></div>
+          <div class="n8n-flow-step">
+            <div class="n8n-flow-num">4</div>
+            <div class="n8n-flow-text">
+              <h4>n8n procesa y envia</h4>
+              <p>El flujo de n8n recibe el payload, lo procesa y envia el correo real al usuario.</p>
+            </div>
+          </div>
+          <div class="n8n-flow-connector"></div>
+          <div class="n8n-flow-step">
+            <div class="n8n-flow-num">5</div>
+            <div class="n8n-flow-text">
+              <h4>Usuario recibe confirmacion</h4>
+              <p>Correo HTML profesional en la bandeja de entrada del solicitante.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== STACK TECNICO ==================== -->
+  <section class="stack-section diagonal-top diagonal-bottom">
+    <div class="container" style="text-align: center;">
+      <div class="reveal">
+        <div class="section-label" style="justify-content: center;">07 &mdash; Tecnologia</div>
+        <h2>Stack Tecnico</h2>
+        <p style="color: var(--gray); max-width: 600px; margin: 1rem auto 0; font-size: 1.05rem;">
+          Construido con herramientas modernas, optimizado para velocidad y experiencia de usuario.
+        </p>
+      </div>
+
+      <div class="stack-grid">
+        <div class="stack-chip reveal reveal-delay-1"><span class="chip-dot chip-dot-react"></span> React 19</div>
+        <div class="stack-chip reveal reveal-delay-2"><span class="chip-dot chip-dot-vite"></span> Vite</div>
+        <div class="stack-chip reveal reveal-delay-3"><span class="chip-dot chip-dot-framer"></span> Framer Motion</div>
+        <div class="stack-chip reveal reveal-delay-4"><span class="chip-dot chip-dot-phosphor"></span> Phosphor Icons</div>
+        <div class="stack-chip reveal reveal-delay-5"><span class="chip-dot chip-dot-local"></span> localStorage</div>
+        <div class="stack-chip reveal reveal-delay-6"><span class="chip-dot chip-dot-vercel"></span> Vercel</div>
+        <div class="stack-chip reveal reveal-delay-7"><span class="chip-dot chip-dot-xlsx"></span> xlsx (Export)</div>
+        <div class="stack-chip reveal reveal-delay-8"><span class="chip-dot chip-dot-n8n"></span> n8n (Webhook)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MEJORAS FUTURAS ==================== -->
+  <section class="future-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">08 &mdash; Roadmap</div>
+        <h2>Mejoras Futuras</h2>
+        <p style="color: var(--gray); max-width: 700px; margin-top: 1rem; font-size: 1.05rem;">
+          Bookspace fue disenado para escalar. Estas son las mejoras planificadas para convertirlo
+          en una solucion empresarial completa.
+        </p>
+      </div>
+
+      <div class="future-grid">
+        <div class="future-card reveal reveal-delay-1">
+          <span class="future-card-num">01</span>
+          <h4>Base de datos real</h4>
+          <p>Migrar de localStorage a Supabase o Firebase para persistencia en la nube, sincronizacion multi-dispositivo y escalabilidad.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-2">
+          <span class="future-card-num">02</span>
+          <h4>Autenticacion OAuth</h4>
+          <p>Login con Google o Microsoft para integracion con el ecosistema corporativo y gestion de identidad centralizada.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-3">
+          <span class="future-card-num">03</span>
+          <h4>Notificaciones push</h4>
+          <p>Alertas en tiempo real por Teams, Slack o notificaciones nativas del navegador para recordatorios y cambios.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-4">
+          <span class="future-card-num">04</span>
+          <h4>Calendario visual</h4>
+          <p>Vista tipo Google Calendar con drag-and-drop para reservar, reprogramar y visualizar la ocupacion semanal.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-5">
+          <span class="future-card-num">05</span>
+          <h4>API REST</h4>
+          <p>Endpoints documentados para integracion con ERPs, CRMs y otros sistemas empresariales de la organizacion.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-6">
+          <span class="future-card-num">06</span>
+          <h4>App movil</h4>
+          <p>Aplicacion nativa con React Native para reservar desde el celular con la misma experiencia de usuario.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-1">
+          <span class="future-card-num">07</span>
+          <h4>Deteccion de "no shows"</h4>
+          <p>Sistema inteligente que detecta cuando una sala reservada no se utiliza y la libera automaticamente.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-2">
+          <span class="future-card-num">08</span>
+          <h4>Reportes automaticos</h4>
+          <p>Envio semanal de reportes de uso, ocupacion y tendencias al equipo de administracion.</p>
+        </div>
+        <div class="future-card reveal reveal-delay-3">
+          <span class="future-card-num">09</span>
+          <h4>Control de acceso fisico</h4>
+          <p>Integracion con sistemas de cerraduras inteligentes para desbloqueo automatico de la sala reservada.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== DEMO EN VIVO ==================== -->
+  <section class="demo-section">
+    <div class="bg-text">BOOKSPACE</div>
+    <div class="container" style="position: relative; z-index: 2;">
+      <div class="reveal">
+        <div class="section-label" style="justify-content: center;">09 &mdash; Demo</div>
+        <h2>Verlo en accion</h2>
+        <p style="color: var(--gray); max-width: 600px; margin: 1.5rem auto 0; font-size: 1.1rem;">
+          Explora Bookspace en vivo. Desplegado en Vercel, codigo abierto en GitHub.
+        </p>
+      </div>
+      <div class="demo-links reveal reveal-delay-2">
+        <a href="https://bookspace-omega.vercel.app" target="_blank" class="demo-btn demo-btn-primary">
+          &#9889; Demo en Vivo
+        </a>
+        <a href="https://github.com/sjimenezlon/bookspace" target="_blank" class="demo-btn demo-btn-secondary">
+          &#128187; Repositorio GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-text">
+        <span>BECA IA SER ANDI</span> &mdash; Universidad EAFIT &mdash; Nodo &mdash; Automation Pro Max &mdash; 2026
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== SCROLL REVEAL JS ==================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -60px 0px'
+      });
+
+      revealElements.forEach(el => observer.observe(el));
+
+      // Parallax on hero orbs
+      window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const orb1 = document.querySelector('.hero-orb-1');
+        const orb2 = document.querySelector('.hero-orb-2');
+        if (orb1) orb1.style.transform = `translate(0, ${scrolled * 0.15}px)`;
+        if (orb2) orb2.style.transform = `translate(0, ${scrolled * -0.1}px)`;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { getRoomById } from '../data/rooms';
+import { getRoomById } from '../store/reservations';
 
 const N8N_WEBHOOK_URL = 'https://lasg5.app.n8n.cloud/webhook/bookspace-reserva';
 

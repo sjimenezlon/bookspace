@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { seedIfNeeded } from './store/seedData';
+import { fetchRooms } from './store/reservations';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import ReservationForm from './components/ReservationForm';
@@ -17,8 +17,12 @@ function App() {
   const [activeView, setActiveView] = useState('reserve');
   const [emailData, setEmailData] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [roomsLoaded, setRoomsLoaded] = useState(false);
 
-  useEffect(() => { seedIfNeeded(); }, []);
+  // Load rooms from Supabase on mount
+  useEffect(() => {
+    fetchRooms().then(() => setRoomsLoaded(true));
+  }, []);
 
   const handleLogin = useCallback((userData) => {
     setUser(userData);
@@ -42,6 +46,14 @@ function App() {
 
   if (!user) {
     return <Login onLogin={handleLogin} />;
+  }
+
+  if (!roomsLoaded) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: 14 }}>
+        Conectando con base de datos...
+      </div>
+    );
   }
 
   const views = {
