@@ -17,7 +17,7 @@ export function buildWebhookPayload(reservation) {
     estado: reservation.status,
     titulo: reservation.title,
     organizador: reservation.organizer,
-    email_organizador: `${reservation.organizer.toLowerCase().replace(/\s+/g, '.')}@eafit.edu.co`,
+    email_organizador: reservation.email || `${reservation.organizer.toLowerCase().replace(/\s+/g, '.')}@eafit.edu.co`,
     area: reservation.team,
     sala_id: reservation.roomId,
     sala_nombre: room?.name || reservation.roomName,

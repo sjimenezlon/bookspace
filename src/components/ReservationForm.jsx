@@ -74,7 +74,7 @@ export default function ReservationForm({ onResult, user }) {
     setSuccess(null);
     setPendingApproval(false);
 
-    const data = { ...form, attendees: parseInt(form.attendees) || 0 };
+    const data = { ...form, attendees: parseInt(form.attendees) || 0, email: user?.email || '' };
     const result = createReservation(data);
 
     // Send webhook to n8n for all outcomes

@@ -1,52 +1,44 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { EnvelopeSimple, ShieldCheck } from '@phosphor-icons/react';
 import './Login.css';
 
-const DEMO_USERS = [
-  { email: 'ana.garcia@eafit.edu.co', name: 'Ana García', role: 'Coordinadora', dept: 'Contabilidad', avatar: 'AG', isAdmin: false },
-  { email: 'carlos.mesa@eafit.edu.co', name: 'Carlos Mesa', role: 'Director', dept: 'Ingeniería', avatar: 'CM', isAdmin: false },
-  { email: 'admin@eafit.edu.co', name: 'Administrador', role: 'Super Admin', dept: 'Tecnología', avatar: 'AD', isAdmin: true },
-];
+function nameFromEmail(email) {
+  const local = email.split('@')[0];
+  return local
+    .replace(/[._-]/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
-      setError('Ingrese correo y contraseña');
+    if (!email || !email.includes('@')) {
+      setError('Ingresa un correo valido');
       return;
     }
 
+    const displayName = name.trim() || nameFromEmail(email);
+
     setLoading(true);
     setTimeout(() => {
-      const user = DEMO_USERS.find(u => u.email === email);
-      if (user && password === 'eafit2026') {
-        onLogin(user);
-      } else if (email.includes('@') && password.length >= 4) {
-        onLogin({
-          email,
-          name: email.split('@')[0].replace('.', ' ').replace(/\b\w/g, c => c.toUpperCase()),
-          role: 'Usuario',
-          dept: 'General',
-          avatar: email.slice(0, 2).toUpperCase(),
-          isAdmin: false,
-        });
-      } else {
-        setError('Credenciales incorrectas');
-        setLoading(false);
-      }
-    }, 1200);
-  };
-
-  const handleQuickLogin = (user) => {
-    setLoading(true);
-    setTimeout(() => onLogin(user), 800);
+      onLogin({
+        email,
+        name: displayName,
+        role: isAdmin ? 'Super Admin' : 'Usuario',
+        dept: 'General',
+        avatar: displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        isAdmin,
+      });
+    }, 800);
   };
 
   return (
@@ -92,41 +84,62 @@ export default function Login({ onLogin }) {
 
         <motion.form className="login-form" onSubmit={handleSubmit} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
           <div className="login-field">
-            <label>Correo institucional</label>
-            <input type="email" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} placeholder="usuario@eafit.edu.co" autoComplete="email" />
+            <label>Correo electronico *</label>
+            <div className="input-with-icon">
+              <EnvelopeSimple size={18} className="input-icon" />
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setError(''); }}
+                placeholder="tu.correo@ejemplo.com"
+                autoComplete="email"
+                autoFocus
+              />
+            </div>
+            <span className="field-hint">Las confirmaciones se enviaran a este correo</span>
           </div>
+
           <div className="login-field">
-            <label>Contraseña</label>
-            <input type="password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }} placeholder="••••••••" autoComplete="current-password" />
+            <label>Nombre (opcional)</label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Se genera automaticamente del correo"
+              autoComplete="name"
+            />
           </div>
+
+          {/* Admin toggle */}
+          <button
+            type="button"
+            className={`admin-toggle ${isAdmin ? 'active' : ''}`}
+            onClick={() => setIsAdmin(v => !v)}
+          >
+            <ShieldCheck size={16} weight={isAdmin ? 'fill' : 'regular'} />
+            <span>Acceder como administrador</span>
+            <div className={`toggle-switch ${isAdmin ? 'on' : ''}`}>
+              <div className="toggle-knob" />
+            </div>
+          </button>
 
           {error && (
             <motion.p className="login-error" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>{error}</motion.p>
           )}
 
           <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? <span className="login-spinner" /> : 'Iniciar sesión'}
+            {loading ? <span className="login-spinner" /> : 'Acceder'}
           </button>
         </motion.form>
 
-        <motion.div className="quick-access" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
-          <p className="quick-label">Acceso rapido (demo)</p>
-          <div className="quick-users">
-            {DEMO_USERS.map(user => (
-              <button key={user.email} className={`quick-user ${user.isAdmin ? 'admin-user' : ''}`} onClick={() => handleQuickLogin(user)} disabled={loading}>
-                <span className="quick-avatar">{user.avatar}</span>
-                <div className="quick-info">
-                  <span className="quick-name">
-                    {user.name}
-                    {user.isAdmin && <span className="admin-tag">ADMIN</span>}
-                  </span>
-                  <span className="quick-role">{user.role} &bull; {user.dept}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-          <p className="quick-hint">Contraseña demo: <code>eafit2026</code></p>
-        </motion.div>
+        <motion.p
+          className="login-note"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          No se requiere contraseña. Solo ingresa tu correo para comenzar.
+        </motion.p>
       </motion.div>
 
       <motion.p className="login-footer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
