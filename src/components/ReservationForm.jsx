@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarPlus, Warning, CheckCircle, Users, Clock, Buildings, Eye, EyeSlash, ShieldCheck } from '@phosphor-icons/react';
 import { getCachedRooms, getRoomsByCapacity, createReservation, getAvailableRooms } from '../store/reservations';
-import { sendWebhook } from '../utils/webhookPayload';
+
 import './ReservationForm.css';
 
 const TEAMS = [
@@ -57,8 +57,6 @@ export default function ReservationForm({ onResult, user }) {
 
     const data = { ...form, attendees: parseInt(form.attendees) || 0, email: user?.email || '' };
     const result = await createReservation(data);
-
-    sendWebhook(result.reservation);
 
     if (result.success) {
       if (result.needsApproval) { setPendingApproval(true); }

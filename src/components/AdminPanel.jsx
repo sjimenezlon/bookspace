@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, CheckCircle, XCircle, Clock, Warning, Users, Buildings, CalendarCheck, FileXls, FileCsv, DownloadSimple } from '@phosphor-icons/react';
 import { getPendingReservations, getReservations, approveReservation, rejectReservationAdmin, getMetrics } from '../store/reservations';
-import { sendWebhook } from '../utils/webhookPayload';
+
 import * as XLSX from 'xlsx';
 import './AdminPanel.css';
 
@@ -33,9 +33,6 @@ export default function AdminPanel({ user, onRefresh }) {
 
   const handleApprove = async (id) => {
     await approveReservation(id, user.name);
-    const updated = await getReservations();
-    const res = updated.find(r => r.id === id);
-    if (res) sendWebhook(res);
     await loadData();
     onRefresh();
   };
@@ -43,9 +40,6 @@ export default function AdminPanel({ user, onRefresh }) {
   const handleReject = async (id) => {
     if (rejectId === id && rejectReason.trim()) {
       await rejectReservationAdmin(id, user.name, rejectReason);
-      const updated = await getReservations();
-      const res = updated.find(r => r.id === id);
-      if (res) sendWebhook(res);
       setRejectId(null); setRejectReason('');
       await loadData();
       onRefresh();
